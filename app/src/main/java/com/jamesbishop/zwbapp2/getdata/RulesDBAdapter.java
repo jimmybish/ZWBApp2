@@ -1,12 +1,10 @@
 package com.jamesbishop.zwbapp2.getdata;
 
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.net.Uri;
 import android.util.Log;
 
 import java.sql.SQLException;
@@ -37,12 +35,12 @@ public class RulesDBAdapter {
     private static final String KEY_RULE_TITLE = "rule_title";
     private static final String KEY_MENU_INDEX = "index";
 
+    // Full queries to create the 2 required tables in the DB
     private static final String RULESTABLE_CREATE =
             "create table "
             + RULES_TABLE + " (_id integer primary key autoincrement, "
             + KEY_RULE_ID + " text, "
             + KEY_RULE_CONTENT + " text);";
-
 
     private static final String MENUTABLE_CREATE =
             "create table "
