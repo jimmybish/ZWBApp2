@@ -23,8 +23,8 @@ public class RulesDBAdapter {
     private static final int DATABASE_VERSION = 1;
 
     // TODO: Change the below to accommodate different rulesets (date picker in settings)
-    private static final String RULES_TABLE = "20140301";
-    private static final String MENU_TABLE = "M" + RULES_TABLE;
+    private static final String RULES_TABLE = "rules_20140301";
+    private static final String MENU_TABLE = "m_" + RULES_TABLE;
 
     // Columns in the rules table
     private static final String KEY_RULE_ID = "rule_id";
@@ -33,7 +33,7 @@ public class RulesDBAdapter {
     // Columns in the menu table
     // KEY_RULE_ID is the same value. No point doubling up, but this comment is a reminder it exists
     private static final String KEY_RULE_TITLE = "rule_title";
-    private static final String KEY_MENU_INDEX = "index";
+    private static final String KEY_MENU_INDEX = "level";
 
     // Full queries to create the 2 required tables in the DB
     private static final String RULESTABLE_CREATE =
@@ -91,6 +91,10 @@ public class RulesDBAdapter {
         mDBHelper.close();
     }
 
+    public void dropMenu() {
+        mDB.execSQL("DROP TABLE IF EXISTS " + MENU_TABLE);
+        mDB.execSQL(MENUTABLE_CREATE);
+    }
 
     // Insert a rule into the DB
     public long insertRule(String rule_id, String content) {
@@ -102,36 +106,37 @@ public class RulesDBAdapter {
     }
 
     // Insert a Menu entry into the DB
-    public long insertMenu(String rule_id, String content, int index) {
+    public long insertMenu(String rule_id, String title, int index) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_RULE_ID, rule_id + ".");
-        initialValues.put(KEY_RULE_CONTENT, content);
+        initialValues.put(KEY_RULE_TITLE, title);
         initialValues.put(KEY_MENU_INDEX, index);
         return mDB.insert(MENU_TABLE, null, initialValues);
     }
 
     // Retrieve the top level menu
     public Cursor getTopMenu() {
-        return mDB.query(true, MENU_TABLE, new String[] {KEY_RULE_TITLE}, KEY_MENU_INDEX + "= 0", null, null, null, "_id", null);
+        return mDB.query(true, MENU_TABLE, new String[] {KEY_RULE_ID, KEY_RULE_TITLE}, KEY_MENU_INDEX + "= 0", null, null, null, "_id", null);
     }
 
     public Cursor getSecondMenu(String section) throws SQLException {
 
         // EXAMPLE for section 2: Select rule_title where rule_id like '2.%' and index = 1 order by '_id';
-        String args = KEY_RULE_ID + "like '" + section + ".%' and " + KEY_MENU_INDEX + "= 1";
+        String args = KEY_RULE_ID + " like '" + section + "%' and " + KEY_MENU_INDEX + "= 1";
+        Log.d (TAG, args);
         String[] column = {KEY_RULE_TITLE};
 
         Cursor mCursor = mDB.query(true, MENU_TABLE, column, args, null, null, null, "_id", null);
-        if (mCursor != null) {
-            mCursor.moveToFirst();
-        }
+        //if (mCursor != null) {
+        //    mCursor.moveToFirst();
+        //}
         return mCursor;
     }
 
     public Cursor getRules(String section) throws SQLException {
 
         // EXAMPLE for section 2: Select content from 20140301 where rule_id like '2.%' order by '_id';
-        String args = KEY_RULE_ID + "like '" + section + ".%';";
+        String args = KEY_RULE_ID + " like '" + section + "%';";
         String[] column = {KEY_RULE_CONTENT};
 
         Cursor mCursor = mDB.query(true, RULES_TABLE, column, args, null, null, null, "_id", null);
