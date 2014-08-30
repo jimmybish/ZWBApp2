@@ -369,6 +369,7 @@ public class AnimatedExpandableListView extends ExpandableListView {
                 // Set the style of the divider
                 dummyView.setDivider(listView.getDivider(), parent.getMeasuredWidth(), listView.getDividerHeight());
 
+
                 // Make measure specs to measure child views
                 final int measureSpecW = MeasureSpec.makeMeasureSpec(parent.getWidth(), MeasureSpec.EXACTLY);
                 final int measureSpecH = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);

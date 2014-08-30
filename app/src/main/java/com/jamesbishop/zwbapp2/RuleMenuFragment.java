@@ -3,12 +3,15 @@ package com.jamesbishop.zwbapp2;
 import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jamesbishop.zwbapp2.getdata.RulesDBAdapter;
@@ -32,6 +35,7 @@ public class RuleMenuFragment extends Fragment {
     private static final String TAG = "RuleMenuFragment";
     public RuleMenuFragment() {    }
 
+
     // TODO: Possibly not needed. Comment out once it's all running and see.
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
@@ -47,8 +51,10 @@ public class RuleMenuFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
+        // TODO: Move this to a button
         getMenu getmenu = new getMenu(getActivity());
         getmenu.execute("http://www.wftda.com/rules/all/20140301");
+
 
         db = new RulesDBAdapter(getActivity());
         try {
@@ -65,7 +71,11 @@ public class RuleMenuFragment extends Fragment {
         adapter.setData(items);
 
         // Initialise the listview and populate it with the above data
+        Drawable divider = getResources().getDrawable(R.drawable.line);
+
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
+        listView.setGroupIndicator(null);
+        listView.setDivider(divider);
         listView.setAdapter(adapter);
 
         // Handle listview group onclicks (currently only expand and contract groups.
@@ -75,12 +85,15 @@ public class RuleMenuFragment extends Fragment {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
+
                 // If it's open, close it. If it's not, open it.
+                /*
                 if (listView.isGroupExpanded(groupPosition)) {
                     listView.collapseGroupWithAnimation(groupPosition);
                 } else {
                     listView.expandGroupWithAnimation(groupPosition);
                 }
+                */
                 return true;
             }
         });
@@ -138,7 +151,12 @@ public class RuleMenuFragment extends Fragment {
         TextView title;
     }
 
+
+    // Going to try and get group info to use for layouts....
+
     public class RulesMenuAdapter extends AnimatedExpandableListView.AnimatedExpandableListAdapter {
+
+
 
         private LayoutInflater inflater;
         private List<GroupItem> items;
@@ -151,32 +169,65 @@ public class RuleMenuFragment extends Fragment {
             this.items = items;
         }
 
+
+
+
         @Override
         public ChildItem getChild(int groupPosition, int childPosition) {
             return items.get(groupPosition).items.get(childPosition);
         }
 
         @Override
-        public long getChildId(int groupPostion, int childPosition) {
+        public long getChildId(int groupPosition, int childPosition) {
             return childPosition;
+        }
+
+
+        @Override
+        public int getRealChildTypeCount() {
+            return 3;
+        }
+
+        @Override
+        public int getRealChildType(int groupPosition, int childPosition) {
+            int result = 0;
+            if (childPosition == getRealChildrenCount(groupPosition) - getRealChildrenCount(groupPosition)) {
+                result = 1;
+            }
+            if (childPosition == getRealChildrenCount(groupPosition) -1) {
+                result = 2;
+            }
+            return result;
         }
 
         @Override
         public View getRealChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-            // Viewholder pattern. G'aah!
             ChildHolder holder;
             ChildItem item = getChild(groupPosition, childPosition);
 
             if (convertView == null) {
                 holder = new ChildHolder();
-                convertView = inflater.inflate(R.layout.list_item, parent, false);
+                int childType = getRealChildType(groupPosition,childPosition);
+
+                switch (childType) {
+                    case 1:
+                        convertView = inflater.inflate(R.layout.child_item_first, parent, false);
+                        break;
+                    case 2:
+                        convertView = inflater.inflate(R.layout.child_item_last, parent, false);
+                        break;
+                    default:
+                        convertView = inflater.inflate(R.layout.child_item, parent, false);
+                        break;
+                }
+
+
                 holder.content =  (TextView) convertView.findViewById(R.id.childContent);
                 convertView.setTag(holder);
             } else {
                 holder = (ChildHolder) convertView.getTag();
             }
-
             holder.content.setText(item.content);
 
             return convertView;
@@ -211,19 +262,38 @@ public class RuleMenuFragment extends Fragment {
         @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-            // Woo, another ViewHolder pattern! At least these are simpler than the one in ZWB V1!
+            final int position = groupPosition;
             GroupHolder holder;
             GroupItem item = getGroup(groupPosition);
             if (convertView == null) {
                 holder = new GroupHolder();
-                convertView = inflater.inflate(R.layout.group_item, parent, false);
+                if (item.items.isEmpty()) {
+                    convertView = inflater.inflate(R.layout.group_item_empty, parent, false);
+                } else {
+                    convertView = inflater.inflate(R.layout.group_item, parent, false);
+
+                    // Use the dropdown arrow to expand and contract
+                    ImageView dropdown = (ImageView) convertView.findViewById(R.id.dropdown);
+                    dropdown.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (listView.isGroupExpanded(position)) {
+                                listView.collapseGroupWithAnimation(position);
+                            } else {
+                                listView.expandGroupWithAnimation(position);
+                            }
+                        }
+                    });
+
+                }
                 holder.title = (TextView) convertView.findViewById(R.id.textTitle);
                 convertView.setTag(holder);
             } else {
                 holder = (GroupHolder) convertView.getTag();
             }
-
             holder.title.setText(item.title);
+
+
 
             return convertView;
         }
@@ -252,5 +322,12 @@ public class RuleMenuFragment extends Fragment {
         public void onItemSelected(String id) {
         }
     };
+
+
+
+
+
+
+
 
 }
