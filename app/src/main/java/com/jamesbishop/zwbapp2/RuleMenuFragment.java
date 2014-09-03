@@ -3,19 +3,24 @@ package com.jamesbishop.zwbapp2;
 import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jamesbishop.zwbapp2.getdata.RulesDBAdapter;
 import com.jamesbishop.zwbapp2.getdata.getMenu;
+import com.jamesbishop.zwbapp2.getdata.getRules;
+import com.jamesbishop.zwbapp2.getdata.interfaces;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,27 +28,25 @@ import java.util.List;
 
 /**
  * Created by bishopj on 28/08/2014.
+ *
+ * This class uses AnimatedExpandableListView. Credits for that are in AnimatedExpandableListView.java.
+ *
+ * I'm not sure I like how much code is actually in this class (Hard to navigate), but whatever. I think
+ * I prefer the fragment loading the data, rather than the activity. Best practices, be damned!
  */
 
-//TODO: This whole class needs looking at. Switch to Animated ExpandableListView.
-// https://github.com/idunnololz/AnimatedExpandableListView/blob/master/src/com/example/animatedexpandablelistview/MainActivity.java
 
-public class RuleMenuFragment extends Fragment {
+public class RuleMenuFragment extends Fragment implements interfaces.getMenuListener, interfaces.getRulesListener {
 
     private AnimatedExpandableListView listView;
     public RulesMenuAdapter adapter;
-    private static final String TAG = "RuleMenuFragment";
-    public RuleMenuFragment() {    }
-
-
-    // TODO: Possibly not needed. Comment out once it's all running and see.
-    private static final String STATE_ACTIVATED_POSITION = "activated_position";
-
-    // TODO: Possibly not needed. Comment out once it's all running and see.
-    private Callbacks mCallbacks = sDummyCallbacks;
-
     private RulesDBAdapter db;
     private List<GroupItem> items = null;
+    Button emptyButton;
+
+    private static final String TAG = "RuleMenuFragment";
+
+    public RuleMenuFragment() {    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,57 +54,82 @@ public class RuleMenuFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        // TODO: Move this to a button
-        getMenu getmenu = new getMenu(getActivity());
-        getmenu.execute("http://www.wftda.com/rules/all/20140301");
 
-
+        // Read the DB and populate the list
         db = new RulesDBAdapter(getActivity());
         try {
             db.open();
-            fillData();
+            fillAdapter();
             db.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
 
         // Create the data adapter and fill it with data...
         adapter = new RulesMenuAdapter(getActivity());
         adapter.setData(items);
 
         // Initialise the listview and populate it with the above data
-        Drawable divider = getResources().getDrawable(R.drawable.line);
-
+        emptyButton = (Button) v.findViewById(R.id.refresh);
+        emptyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                downloadMenu();
+            }
+        });
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
+        listView.setEmptyView(emptyButton);
         listView.setGroupIndicator(null);
-        listView.setDivider(divider);
         listView.setAdapter(adapter);
 
-        // Handle listview group onclicks (currently only expand and contract groups.
-        // TODO: Handle empty groups like child entries... Oh god.
+
+
+        // Handle listview group onclicks
         listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
 
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                int ruleSection = groupPosition + 1;
 
-
-                // If it's open, close it. If it's not, open it.
-                /*
-                if (listView.isGroupExpanded(groupPosition)) {
-                    listView.collapseGroupWithAnimation(groupPosition);
-                } else {
-                    listView.expandGroupWithAnimation(groupPosition);
-                }
-                */
+                // TODO: Launch the next fragment with rules
+                Toast toast = new Toast(getActivity());
+                toast.makeText(getActivity(),Integer.toString(ruleSection), Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
 
+        // Handle listview child onclicks
+        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Toast toast = new Toast(getActivity());
+                toast.makeText(getActivity(),Integer.toString(childPosition), Toast.LENGTH_SHORT).show();
+                downloadRules("2.1");
+                return true;
+            }
+        });
+
+
         return v;
     }
 
-    private void fillData() {
+    // Starts the AsyncTasks to download all the things!
+    private void downloadMenu() {
+        getMenu getmenu = new getMenu(getActivity());
+        getmenu.setListener(this);
+        getmenu.execute("http://www.wftda.com/rules/all/20140301");
+    }
+
+    private void downloadRules(String section) {
+        getRules getrules = new getRules(getActivity());
+        getrules.setListener(this);
+        getrules.execute("http://www.wftda.com/rules/20140301/section/" + section);
+    }
+
+
+
+    // Opens 2 cursors and cycles through them, populating the Items listgroup.
+    private void fillAdapter() {
         items = new ArrayList<GroupItem>();
         Cursor parentC = db.getTopMenu();
 
@@ -130,6 +158,23 @@ public class RuleMenuFragment extends Fragment {
             items.add(parent);
         }
     }
+
+    // This is called when the getMenu AsyncTask completes... Hopefully....
+    @Override
+    public void callback() {
+        items.clear();
+        try {
+            db.open();
+            fillAdapter();
+            db.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        adapter.items.addAll(items);
+        adapter.notifyDataSetChanged();
+        Log.d(TAG, "Callback called");
+    }
+
 
     // Store the group title and create an ArrayList of children for each group
     private static class GroupItem {
@@ -191,7 +236,7 @@ public class RuleMenuFragment extends Fragment {
         @Override
         public int getRealChildType(int groupPosition, int childPosition) {
             int result = 0;
-            if (childPosition == getRealChildrenCount(groupPosition) - getRealChildrenCount(groupPosition)) {
+            if (childPosition == 0) {
                 result = 1;
             }
             if (childPosition == getRealChildrenCount(groupPosition) -1) {
@@ -260,6 +305,27 @@ public class RuleMenuFragment extends Fragment {
         }
 
         @Override
+        public int getGroupTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getGroupType(int groupPosition) {
+            int result = 0;
+            if (getGroup(groupPosition).items.isEmpty()) {
+                result = 1;
+            }
+            return result;
+        }
+
+        /*
+        Exactly the same as getChildView, but for the groups. Using the Holder pattern for groups since there are 2
+        different layouts, depending on whether the group has any children or not.
+        If it does have children, use the layout with the ImageView, then set a listener to that ImageView to
+        expand or collapse the group. I could do the same with one layout and show or hide the ImageView at runtime, but I think
+        statically selecting the view when loaded may be less expensive. Not entirely sure.
+         */
+        @Override
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
             final int position = groupPosition;
@@ -267,33 +333,36 @@ public class RuleMenuFragment extends Fragment {
             GroupItem item = getGroup(groupPosition);
             if (convertView == null) {
                 holder = new GroupHolder();
-                if (item.items.isEmpty()) {
-                    convertView = inflater.inflate(R.layout.group_item_empty, parent, false);
-                } else {
-                    convertView = inflater.inflate(R.layout.group_item, parent, false);
+                int groupType = getGroupType(groupPosition);
 
-                    // Use the dropdown arrow to expand and contract
-                    ImageView dropdown = (ImageView) convertView.findViewById(R.id.dropdown);
-                    dropdown.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (listView.isGroupExpanded(position)) {
-                                listView.collapseGroupWithAnimation(position);
-                            } else {
-                                listView.expandGroupWithAnimation(position);
+                switch (groupType) {
+                    case 1: // Is empty
+                        convertView = inflater.inflate(R.layout.group_item_empty, parent, false);
+                        break;
+                    default:
+                        convertView = inflater.inflate(R.layout.group_item, parent, false);
+
+                        // Use the dropdown arrow to expand and contract
+                        ImageView dropdown = (ImageView) convertView.findViewById(R.id.dropdown);
+                        dropdown.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (listView.isGroupExpanded(position)) {
+                                    listView.collapseGroupWithAnimation(position);
+                                } else {
+                                    listView.expandGroupWithAnimation(position);
+                                }
                             }
-                        }
-                    });
-
+                        });
+                        break;
                 }
+
                 holder.title = (TextView) convertView.findViewById(R.id.textTitle);
                 convertView.setTag(holder);
             } else {
                 holder = (GroupHolder) convertView.getTag();
             }
             holder.title.setText(item.title);
-
-
 
             return convertView;
         }
@@ -305,29 +374,26 @@ public class RuleMenuFragment extends Fragment {
     }
 
 
+    /*
+    * All the options menu stuff. Show the refresh button and handle what it does.
+     */
 
-    public interface Callbacks {
-        /**
-         * Callback for when an item has been selected.
-         */
-        public void onItemSelected(String id);
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+        final MenuItem refreshItem = menu.findItem(R.id.menuRefresh);
+        refreshItem.setVisible(true);
     }
 
-    /**
-     * A dummy implementation of the {@link Callbacks} interface that does
-     * nothing. Used only when this fragment is not attached to an activity.
-     */
-    private static Callbacks sDummyCallbacks = new Callbacks() {
-        @Override
-        public void onItemSelected(String id) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuRefresh:
+                downloadMenu();
+                return true;
         }
-    };
-
-
-
-
-
-
-
+        return super.onOptionsItemSelected(item);
+    }
 
 }

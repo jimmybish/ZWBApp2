@@ -96,6 +96,10 @@ public class RulesDBAdapter {
         mDB.execSQL(MENUTABLE_CREATE);
     }
 
+    public void dropRules() {
+        mDB.execSQL("DROP TABLE IF EXISTS " + RULES_TABLE);
+    }
+
     // Insert a rule into the DB
     public long insertRule(String rule_id, String content) {
         ContentValues initialValues = new ContentValues();

@@ -2,20 +2,24 @@ package com.jamesbishop.zwbapp2.getdata;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
+
+import com.jamesbishop.zwbapp2.RuleMenuActivity;
+import com.jamesbishop.zwbapp2.RuleMenuFragment;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import static com.jamesbishop.zwbapp2.RuleMenuActivity.setRefreshActionButtonState;
+
 /**
  * Created by bishopj on 27/08/2014.
  */
 public class getMenu extends AsyncTask<String, Void, String> {
 
-    String[] topLevel;
-    String[] secLevel;
-
+    private interfaces.getMenuListener mListener;
     private final Context mCtx;
     private static final String TAG = "getMenu";
 
@@ -23,6 +27,21 @@ public class getMenu extends AsyncTask<String, Void, String> {
         this.mCtx = context;
     }
 
+    public void setListener(RuleMenuFragment listener) {
+        mListener = listener;
+    }
+
+
+    @Override
+    protected void onPreExecute() {
+        RuleMenuActivity.menuRefreshing = true;
+        setRefreshActionButtonState();
+        super.onPreExecute();
+    }
+
+    /*
+    Get the Menu and populate the DB.
+     */
     @Override
     protected String doInBackground(String... strings) {
         StringBuffer buffer = new StringBuffer();
@@ -32,8 +51,8 @@ public class getMenu extends AsyncTask<String, Void, String> {
             Document doc = Jsoup.connect(strings[0]).get();
 
             Boolean gotPage = doc.title() != null ? true:false;
-            String title = gotPage ? "Page is " + doc.title(): "Connection failed";
-            //Log.d(TAG, title);
+            // String title = gotPage ? "Page is " + doc.title(): "Connection failed";
+            // Log.d(TAG, title);
 
             if (gotPage) {
                 Elements listElems = doc.select("div.ruleSection");
@@ -50,7 +69,6 @@ public class getMenu extends AsyncTask<String, Void, String> {
                     // Get the rule and split it into useable values for the DB.
                     String[] ruleSplit = rule.text().split(" ");
                     String ruleNum = ruleSplit[0];
-                    String ruleTitle = ruleSplit[1];
 
                     // Insert a parent selection (has a .), otherwise, insert a child selection
                     if (!ruleNum.contains(".")) {
@@ -74,6 +92,8 @@ public class getMenu extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        super.onPostExecute(s);
+        RuleMenuActivity.menuRefreshing = false;
+        setRefreshActionButtonState();
+        mListener.callback();
     }
 }
