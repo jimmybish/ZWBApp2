@@ -1,5 +1,6 @@
 package com.jamesbishop.zwbapp2;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
@@ -36,6 +37,7 @@ import java.util.List;
  */
 
 
+
 public class RuleMenuFragment extends Fragment implements interfaces.getMenuListener, interfaces.getRulesListener {
 
     private AnimatedExpandableListView listView;
@@ -43,10 +45,26 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     private RulesDBAdapter db;
     private List<GroupItem> items = null;
     Button emptyButton;
+    onMenuSelectedListener mListener;
 
     private static final String TAG = "RuleMenuFragment";
 
     public RuleMenuFragment() {    }
+
+    // The interface the Activity must implement
+    public interface onMenuSelectedListener {
+        public void onMenuSelected(String rule_id);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (onMenuSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement the listener");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,6 +93,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             @Override
             public void onClick(View v) {
                 downloadMenu();
+                downloadRules();
             }
         });
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
@@ -89,11 +108,11 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                int ruleSection = groupPosition + 1;
-
+                String rule_id = items.get(groupPosition).ruleId;
                 // TODO: Launch the next fragment with rules
-                Toast toast = new Toast(getActivity());
-                toast.makeText(getActivity(),Integer.toString(ruleSection), Toast.LENGTH_SHORT).show();
+                mListener.onMenuSelected(rule_id);
+                //Toast toast = new Toast(getActivity());
+                //toast.makeText(getActivity(), rule_id, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -102,9 +121,10 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Toast toast = new Toast(getActivity());
-                toast.makeText(getActivity(),Integer.toString(childPosition), Toast.LENGTH_SHORT).show();
-                downloadRules("2.1");
+                String rule_id = items.get(groupPosition).items.get(childPosition).ruleId;
+                mListener.onMenuSelected(rule_id);
+                //Toast toast = new Toast(getActivity());
+                //toast.makeText(getActivity(),rule_id, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -113,6 +133,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         return v;
     }
 
+
     // Starts the AsyncTasks to download all the things!
     private void downloadMenu() {
         getMenu getmenu = new getMenu(getActivity());
@@ -120,10 +141,10 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         getmenu.execute("http://www.wftda.com/rules/all/20140301");
     }
 
-    private void downloadRules(String section) {
+    private void downloadRules() {
         getRules getrules = new getRules(getActivity());
         getrules.setListener(this);
-        getrules.execute("http://www.wftda.com/rules/20140301/section/" + section);
+        getrules.execute("http://www.wftda.com/rules/all/20140301/");
     }
 
 
@@ -141,8 +162,6 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             GroupItem parent = new GroupItem();
             parent.ruleId = parentC.getString(0);
             parent.title = parentC.getString(1);
-            Log.d(TAG, parent.ruleId);
-
 
             try {
                 childC = db.getSecondMenu(parent.ruleId);
@@ -151,8 +170,8 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             }
             while (childC.moveToNext()) {
                 ChildItem child = new ChildItem();
-                child.content = childC.getString(0);
-                Log.d(TAG, child.content);
+                child.ruleId = childC.getString(0);
+                child.content = childC.getString(1);
                 parent.items.add(child);
             }
             items.add(parent);
@@ -172,7 +191,6 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         }
         adapter.items.addAll(items);
         adapter.notifyDataSetChanged();
-        Log.d(TAG, "Callback called");
     }
 
 
@@ -186,6 +204,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     // Store the text for each child item
     private static class ChildItem {
         String content;
+        String ruleId;
     }
 
     // ViewHolders with the appropriate TexViews (maybe add images to this...)
@@ -372,6 +391,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             return true;
         }
     }
+
 
 
     /*

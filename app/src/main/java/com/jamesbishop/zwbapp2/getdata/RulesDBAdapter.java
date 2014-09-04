@@ -23,7 +23,7 @@ public class RulesDBAdapter {
     private static final int DATABASE_VERSION = 1;
 
     // TODO: Change the below to accommodate different rulesets (date picker in settings)
-    private static final String RULES_TABLE = "rules_20140301";
+    private static final String RULES_TABLE = "rules";
     private static final String MENU_TABLE = "m_" + RULES_TABLE;
 
     // Columns in the rules table
@@ -37,13 +37,13 @@ public class RulesDBAdapter {
 
     // Full queries to create the 2 required tables in the DB
     private static final String RULESTABLE_CREATE =
-            "create table "
+            "create table if not exists "
             + RULES_TABLE + " (_id integer primary key autoincrement, "
             + KEY_RULE_ID + " text, "
             + KEY_RULE_CONTENT + " text);";
 
     private static final String MENUTABLE_CREATE =
-            "create table "
+            "create table if not exists "
             + MENU_TABLE + " (_id integer primary key autoincrement, "
             + KEY_MENU_INDEX + " integer, "
             + KEY_RULE_ID + " text, "
@@ -98,6 +98,7 @@ public class RulesDBAdapter {
 
     public void dropRules() {
         mDB.execSQL("DROP TABLE IF EXISTS " + RULES_TABLE);
+        mDB.execSQL(RULESTABLE_CREATE);
     }
 
     // Insert a rule into the DB
@@ -124,16 +125,9 @@ public class RulesDBAdapter {
     }
 
     public Cursor getSecondMenu(String section) throws SQLException {
-
-        // EXAMPLE for section 2: Select rule_title where rule_id like '2.%' and index = 1 order by '_id';
         String args = KEY_RULE_ID + " like '" + section + "%' and " + KEY_MENU_INDEX + "= 1";
-        Log.d (TAG, args);
-        String[] column = {KEY_RULE_TITLE};
-
+        String[] column = {KEY_RULE_ID, KEY_RULE_TITLE};
         Cursor mCursor = mDB.query(true, MENU_TABLE, column, args, null, null, null, "_id", null);
-        //if (mCursor != null) {
-        //    mCursor.moveToFirst();
-        //}
         return mCursor;
     }
 
@@ -141,7 +135,7 @@ public class RulesDBAdapter {
 
         // EXAMPLE for section 2: Select content from 20140301 where rule_id like '2.%' order by '_id';
         String args = KEY_RULE_ID + " like '" + section + "%';";
-        String[] column = {KEY_RULE_CONTENT};
+        String[] column = {KEY_RULE_ID, KEY_RULE_CONTENT};
 
         Cursor mCursor = mDB.query(true, RULES_TABLE, column, args, null, null, null, "_id", null);
         if (mCursor != null) {

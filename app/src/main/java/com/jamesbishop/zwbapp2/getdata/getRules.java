@@ -66,7 +66,7 @@ public class getRules extends AsyncTask<String, Void, String> {
                     String ruleContent = rule.html();
                     String split[] = rule.text().split(" ");
                     rule_id = split[0];
-                    Log.d(TAG, rule_id + "|" + ruleContent);
+                    // Log.d(TAG, rule_id + "|" + ruleContent);
                     db.insertRule(rule_id, ruleContent);
 
                     // Get the rule's full HTML. Not interested in titles.
