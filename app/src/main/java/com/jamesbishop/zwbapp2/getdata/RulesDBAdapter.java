@@ -136,11 +136,7 @@ public class RulesDBAdapter {
         // EXAMPLE for section 2: Select content from 20140301 where rule_id like '2.%' order by '_id';
         String args = KEY_RULE_ID + " like '" + section + "%';";
         String[] column = {KEY_RULE_ID, KEY_RULE_CONTENT};
-
         Cursor mCursor = mDB.query(true, RULES_TABLE, column, args, null, null, null, "_id", null);
-        if (mCursor != null) {
-            mCursor.moveToFirst();
-        }
         return mCursor;
     }
 }

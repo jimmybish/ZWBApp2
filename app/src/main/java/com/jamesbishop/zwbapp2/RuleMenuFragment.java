@@ -32,7 +32,7 @@ import java.util.List;
  *
  * This class uses AnimatedExpandableListView. Credits for that are in AnimatedExpandableListView.java.
  *
- * I'm not sure I like how much code is actually in this class (Hard to navigate), but whatever. I think
+ * I'm not sure I like how much code is actually in this class (So many methods!), but whatever. I think
  * I prefer the fragment loading the data, rather than the activity. Best practices, be damned!
  */
 
@@ -293,7 +293,6 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
                 holder = (ChildHolder) convertView.getTag();
             }
             holder.content.setText(item.content);
-
             return convertView;
         }
 
@@ -411,6 +410,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         switch (item.getItemId()) {
             case R.id.menuRefresh:
                 downloadMenu();
+                downloadRules();
                 return true;
         }
         return super.onOptionsItemSelected(item);

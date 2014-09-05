@@ -21,6 +21,7 @@ public class getRules extends AsyncTask<String, Void, String> {
     private interfaces.getRulesListener mListener;
     private final Context mCtx;
     private static final String TAG = "getRules";
+    private String ruleId;
 
     public getRules(Context context) {
         this.mCtx = context;
@@ -59,15 +60,15 @@ public class getRules extends AsyncTask<String, Void, String> {
 
                 // Gets a rule ID, as set by each element. If no id is supplied, this will
                 // hold the previous value. Not perfect, but the best solution I can come up with.
-                String rule_id;
+
 
                 for (Element rule : listElems) {
 
                     String ruleContent = rule.html();
                     String split[] = rule.text().split(" ");
-                    rule_id = split[0];
+                    ruleId = split[0];
                     // Log.d(TAG, rule_id + "|" + ruleContent);
-                    db.insertRule(rule_id, ruleContent);
+                    db.insertRule(ruleId, ruleContent);
 
                     // Get the rule's full HTML. Not interested in titles.
                     /*

@@ -5,11 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -24,24 +25,20 @@ import java.util.ArrayList;
 
 public class RuleListFragment extends Fragment {
 
-    private RulesDBAdapter db;
-    private static String mRuleId;
     private ArrayList<RuleArray> mRules;
-    private RulesAdapter mRulesAdapter;
-    private ListView listview;
     private static final String TAG = "RuleListFragment";
 
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_rule_list, null);
+        final View v = inflater.inflate(R.layout.fragment_rule_list, null);
 
         // Get the rule ID handed to it and set it to a String value.
-        mRuleId = getArguments().getString("RULE_ID");
+        String mRuleId = getArguments().getString("RULE_ID");
         Log.d(TAG, mRuleId);
         fillData(mRuleId);
-        mRulesAdapter = new RulesAdapter(getActivity(), 0, mRules);
-        listview = (ListView) v.findViewById(R.id.rule_list);
+        final RulesAdapter mRulesAdapter = new RulesAdapter(getActivity(), 0, mRules);
+        ListView listview = (ListView) v.findViewById(R.id.rule_list);
         listview.setAdapter(mRulesAdapter);
 
 
@@ -49,7 +46,7 @@ public class RuleListFragment extends Fragment {
     }
 
     private void fillData(String rule_id) {
-        db = new RulesDBAdapter(getActivity());
+        RulesDBAdapter db = new RulesDBAdapter(getActivity());
         mRules = new ArrayList<RuleArray>();
         try {
             db.open();
@@ -93,6 +90,17 @@ public class RuleListFragment extends Fragment {
             public LinkifiedTextView rule_content;
         }
 
+        public CharSequence removeWhitespace(CharSequence source) {
+            if(source == null)
+                return "";
+            int i = source.length();
+
+            // loop back to the first non-whitespace character
+            while(--i >= 0 && Character.isWhitespace(source.charAt(i))) {
+            }
+            return source.subSequence(0, i+1);
+        }
+
         public View getView(int position, View convertView, ViewGroup parent) {
             View v = convertView;
             final ViewHolder holder;
@@ -106,10 +114,11 @@ public class RuleListFragment extends Fragment {
                     holder = (ViewHolder) v.getTag();
                 }
                 String content = rules.get(position).getRuleContent();
-                // TODO: Remove trailing whitespace added by fromHTML.
-                holder.rule_content.setText(Html.fromHtml(content, null, new WftdaTagHandler()));
+                Spanned html = Html.fromHtml(content, null, new WftdaTagHandler());
+                CharSequence trimmed = removeWhitespace(html);
+                holder.rule_content.setText(trimmed);
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
             return v;
         }
