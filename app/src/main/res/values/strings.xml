@@ -3,4 +3,8 @@
 
     <string name="app_name">ZWB App</string>
     <string name="title_rule_detail">Rule Detail</string>
+    <string name="title_activity_rule_list">RuleListActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
 </resources>

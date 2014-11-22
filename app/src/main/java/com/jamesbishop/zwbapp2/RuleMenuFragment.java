@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,7 +15,6 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jamesbishop.zwbapp2.getdata.RulesDBAdapter;
 import com.jamesbishop.zwbapp2.getdata.getMenu;
@@ -53,7 +51,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
     // The interface the Activity must implement
     public interface onMenuSelectedListener {
-        public void onMenuSelected(String rule_id);
+        public void onMenuSelected(String rule_id, String title);
     }
 
     @Override
@@ -99,6 +97,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
         listView.setEmptyView(emptyButton);
         listView.setGroupIndicator(null);
+        listView.setDividerHeight(0);
         listView.setAdapter(adapter);
 
 
@@ -108,11 +107,11 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+
                 String rule_id = items.get(groupPosition).ruleId;
-                // TODO: Launch the next fragment with rules
-                mListener.onMenuSelected(rule_id);
-                //Toast toast = new Toast(getActivity());
-                //toast.makeText(getActivity(), rule_id, Toast.LENGTH_SHORT).show();
+                String title = items.get(groupPosition).title;
+
+                mListener.onMenuSelected(rule_id, title);
                 return true;
             }
         });
@@ -122,9 +121,9 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 String rule_id = items.get(groupPosition).items.get(childPosition).ruleId;
-                mListener.onMenuSelected(rule_id);
-                //Toast toast = new Toast(getActivity());
-                //toast.makeText(getActivity(),rule_id, Toast.LENGTH_SHORT).show();
+                String title = items.get(groupPosition).items.get(childPosition).content;
+
+                mListener.onMenuSelected(rule_id, title);
                 return true;
             }
         });
@@ -249,18 +248,20 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
         @Override
         public int getRealChildTypeCount() {
-            return 3;
+            return 1;
         }
 
         @Override
         public int getRealChildType(int groupPosition, int childPosition) {
             int result = 0;
+            /*
             if (childPosition == 0) {
                 result = 1;
             }
             if (childPosition == getRealChildrenCount(groupPosition) -1) {
                 result = 2;
             }
+            */
             return result;
         }
 
@@ -275,12 +276,14 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
                 int childType = getRealChildType(groupPosition,childPosition);
 
                 switch (childType) {
+                    /*
                     case 1:
                         convertView = inflater.inflate(R.layout.child_item_first, parent, false);
                         break;
                     case 2:
                         convertView = inflater.inflate(R.layout.child_item_last, parent, false);
                         break;
+                    */
                     default:
                         convertView = inflater.inflate(R.layout.child_item, parent, false);
                         break;

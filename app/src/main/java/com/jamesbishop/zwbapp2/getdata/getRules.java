@@ -69,16 +69,17 @@ public class getRules extends AsyncTask<String, Void, String> {
                     for (Element link : listLinks) {
                         String oldLink = link.attr("href");
                         link.attr("href", "http://www.wftda.com" + oldLink);
-                        Log.d(TAG, ruleId + ": " + link.attr("href"));
-                    }
-
-                    // Make headings bold
-                    if (rule.hasClass("ruleSubHeader") || rule.hasClass("single")) {
-                        //ruleContent = "<strong>" + ruleContent + "</strong>";
-                        rule.wrap("<strong></strong>");
+                        // Log.d(TAG, ruleId + ": " + link.attr("href"));
                     }
 
                     String ruleContent = rule.html();
+
+                    // Make headings bold.
+                    // TODO: work out why rule.wrap("<strong></strong> doesn't work
+                    // so I can do this above the String initialisation.
+                    if (rule.hasClass("ruleSubHeader") || rule.hasClass("single")) {
+                        ruleContent = "<strong>" + ruleContent + "</strong>";
+                    }
 
                     String split[] = rule.text().split(" ", 2);
                     // If there's a numbered rule ID, use it. Otherwise, use the previous one (for ordering purposes).

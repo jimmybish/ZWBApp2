@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jamesbishop.zwbapp2" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -24,7 +26,28 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".RuleMenuActivity" />
         </activity>
+
+        <activity
+            android:name="com.jamesbishop.zwbapp2.RuleListActivity"
+            android:label="@string/app_name"
+            android:parentActivityName=".RuleMenuActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.jamesbishop.zwbapp2.RuleMenuActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http"
+                    android:host="www.wftda.com"
+                    android:pathPrefix="/rules" />
+            </intent-filter>
+        </activity>
+
+
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

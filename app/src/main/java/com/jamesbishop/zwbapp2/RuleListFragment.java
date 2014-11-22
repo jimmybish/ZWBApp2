@@ -40,8 +40,7 @@ public class RuleListFragment extends Fragment {
         final RulesAdapter mRulesAdapter = new RulesAdapter(getActivity(), 0, mRules);
         ListView listview = (ListView) v.findViewById(R.id.rule_list);
         listview.setAdapter(mRulesAdapter);
-
-
+        listview.setDividerHeight(0);
         return v;
     }
 
