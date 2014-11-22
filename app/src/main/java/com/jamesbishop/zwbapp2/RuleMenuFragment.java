@@ -181,7 +181,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     // This is called when the getMenu AsyncTask completes... Hopefully....
     @Override
     public void callback() {
-        items.clear();
+        adapter.items.clear();
         try {
             db.open();
             fillAdapter();

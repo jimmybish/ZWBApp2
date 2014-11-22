@@ -104,7 +104,7 @@ public class RulesDBAdapter {
     // Insert a rule into the DB
     public long insertRule(String rule_id, String content) {
         ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_RULE_ID, rule_id);
+        initialValues.put(KEY_RULE_ID, rule_id + ".");
         initialValues.put(KEY_RULE_CONTENT, content);
 
         return mDB.insert(RULES_TABLE, null, initialValues);

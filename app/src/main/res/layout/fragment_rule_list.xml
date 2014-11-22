@@ -7,5 +7,7 @@
     <ListView
         android:id="@+id/rule_list"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"></ListView>
+        android:layout_height="fill_parent"
+        android:dividerHeight="0dp"
+        ></ListView>
 </LinearLayout>

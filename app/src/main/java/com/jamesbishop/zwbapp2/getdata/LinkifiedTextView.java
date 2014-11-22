@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
 import android.util.AttributeSet;
@@ -26,7 +27,8 @@ public class LinkifiedTextView extends TextView {
         TextView widget = (TextView) this;
         Object text = widget.getText();
         if (text instanceof Spanned) {
-            Spannable buffer = (Spannable) text;
+            // Spannable buffer = (Spannable) text;
+            SpannableString buffer = new SpannableString(widget.getText());
 
             int action = event.getAction();
 

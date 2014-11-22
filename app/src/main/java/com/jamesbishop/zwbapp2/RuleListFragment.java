@@ -60,6 +60,7 @@ public class RuleListFragment extends Fragment {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        db.close();
     }
 
     public class RulesAdapter extends ArrayAdapter<RuleArray> {

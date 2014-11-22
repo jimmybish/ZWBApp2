@@ -64,23 +64,28 @@ public class getRules extends AsyncTask<String, Void, String> {
 
                 for (Element rule : listElems) {
 
-                    String ruleContent = rule.html();
-                    String split[] = rule.text().split(" ");
-                    ruleId = split[0];
-                    // Log.d(TAG, rule_id + "|" + ruleContent);
-                    db.insertRule(ruleId, ruleContent);
-
-                    // Get the rule's full HTML. Not interested in titles.
-                    /*
-                    * Well, maybe I am. This will remain commented out for now.
-                    if (rule.hasClass("ruleSection")) {
-                        Log.d("getRules", "Don't want no titles");
-                    } else {
-                        String ruleContent = rule.html();
-                        Log.d("getRules", ruleContent);
-
+                    // Edit links with a handler for Intents
+                    Elements listLinks = rule.select("a");
+                    for (Element link : listLinks) {
+                        String oldLink = link.attr("href");
+                        link.attr("href", "http://www.wftda.com" + oldLink);
+                        Log.d(TAG, ruleId + ": " + link.attr("href"));
                     }
-                    */
+
+                    // Make headings bold
+                    if (rule.hasClass("ruleSubHeader") || rule.hasClass("single")) {
+                        //ruleContent = "<strong>" + ruleContent + "</strong>";
+                        rule.wrap("<strong></strong>");
+                    }
+
+                    String ruleContent = rule.html();
+
+                    String split[] = rule.text().split(" ", 2);
+                    // If there's a numbered rule ID, use it. Otherwise, use the previous one (for ordering purposes).
+                    if (split[0].length() > 0 && Character.isDigit(split[0].charAt(0)))
+                        ruleId = split[0];
+
+                    db.insertRule(ruleId, ruleContent);
 
                 }
                 db.close();
