@@ -4,9 +4,11 @@ import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,22 +29,61 @@ public class RuleListFragment extends Fragment {
 
     private ArrayList<RuleArray> mRules;
     private static final String TAG = "RuleListFragment";
+    private ListView listview;
+    private RulesAdapter mRulesAdapter;
+    public int selectedItem = -1;
 
 
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_rule_list, null);
 
+
         // Get the rule ID handed to it and set it to a String value.
         String mRuleId = getArguments().getString("RULE_ID");
         Log.d(TAG, mRuleId);
         fillData(mRuleId);
-        final RulesAdapter mRulesAdapter = new RulesAdapter(getActivity(), 0, mRules);
-        ListView listview = (ListView) v.findViewById(R.id.rule_list);
+        mRulesAdapter = new RulesAdapter(getActivity(), 0, mRules);
+
+        // Set all the ListView things
+        listview = (ListView) v.findViewById(R.id.rule_list);
         listview.setAdapter(mRulesAdapter);
         listview.setDividerHeight(0);
+
+        registerForContextMenu(listview);
+
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO: Make a rule detail thingy
+            }
+        });
+
+        listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO: Action bar menu
+
+                listview.setItemChecked(position, true);
+
+                RuleContextMenu menu = new RuleContextMenu();
+                ActionBarActivity activity = (ActionBarActivity) getActivity();
+                ActionMode mode = activity.startSupportActionMode(menu);
+                Object[] tags = new Object[3];
+                tags[0] = view.getRootView().getContext();
+                tags[1] = position;
+                tags[2] = mRulesAdapter.rules.get(position).getRuleContent();
+                mode.setTag(tags);
+
+                return false;
+            }
+        });
+
         return v;
     }
+
+
+
 
     private void fillData(String rule_id) {
         RulesDBAdapter db = new RulesDBAdapter(getActivity());
@@ -117,6 +158,8 @@ public class RuleListFragment extends Fragment {
                 Spanned html = Html.fromHtml(content, null, new WftdaTagHandler());
                 CharSequence trimmed = removeWhitespace(html);
                 holder.rule_content.setText(trimmed);
+                holder.rule_content.setLongClickable(true);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

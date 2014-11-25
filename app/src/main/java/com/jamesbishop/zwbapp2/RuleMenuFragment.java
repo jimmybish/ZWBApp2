@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jamesbishop.zwbapp2.getdata.RulesDBAdapter;
@@ -45,6 +48,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     Button emptyButton;
     onMenuSelectedListener mListener;
 
+
     private static final String TAG = "RuleMenuFragment";
 
     public RuleMenuFragment() {    }
@@ -69,7 +73,6 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         View v = inflater.inflate(R.layout.fragment_rule_menu, null);
 
         setHasOptionsMenu(true);
-
 
         // Read the DB and populate the list
         db = new RulesDBAdapter(getActivity());
@@ -96,7 +99,10 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         });
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
         listView.setEmptyView(emptyButton);
-        listView.setGroupIndicator(null);
+
+        // Set the indicator and position it to the right
+        // listView.setGroupIndicator(null);
+
         listView.setDividerHeight(0);
         listView.setAdapter(adapter);
 
@@ -128,9 +134,33 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
             }
         });
 
+        // Once the listview is created, move the indicator to the right....
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
 
+                /* Seriously. Get the pixel value of the screen width as a float from one Android class,
+                convert from pixels to DP so we can do the appropriate calculations, then convert back to pixels,
+                THEN from float to int values, because heaven forbid Google has 2 related classes that understand
+                the same objects, all so it matches Google's own Material Design guidelines that don't match the
+                default setup provided by the API. I... errr... Ugh! */
+                float width = converters.convertPixelsToDp(listView.getWidth(), getActivity());
+                float myLeft =  width - 40;
+                float myRight = width - 16;
+                int myLeftpx = (int) converters.convertDpToPixel(myLeft, getActivity());
+                int myRightpx = (int) converters.convertDpToPixel(myRight, getActivity());
+
+                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    listView.setIndicatorBounds(myLeftpx, myRightpx);
+                } else {
+                    listView.setIndicatorBoundsRelative(myLeftpx, myRightpx);
+                }
+            }
+        });
         return v;
     }
+
+
 
 
     // Starts the AsyncTasks to download all the things!
@@ -160,7 +190,9 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
             GroupItem parent = new GroupItem();
             parent.ruleId = parentC.getString(0);
-            parent.title = parentC.getString(1);
+
+            String[] trimmed = parentC.getString(1).split("-");
+            parent.title = trimmed[1].trim();
 
             try {
                 childC = db.getSecondMenu(parent.ruleId);
@@ -211,6 +243,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         TextView content;
     }
     private static class GroupHolder {
+        TextView ruleNum;
         TextView title;
     }
 
@@ -364,25 +397,30 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
                         convertView = inflater.inflate(R.layout.group_item, parent, false);
 
                         // Use the dropdown arrow to expand and contract
-                        ImageView dropdown = (ImageView) convertView.findViewById(R.id.dropdown);
-                        dropdown.setOnClickListener(new View.OnClickListener() {
+                        TextView ruleNum = (TextView) convertView.findViewById(R.id.textRuleNum);
+                        final TransitionDrawable transition = (TransitionDrawable) ruleNum.getBackground();
+                        ruleNum.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 if (listView.isGroupExpanded(position)) {
                                     listView.collapseGroupWithAnimation(position);
+                                    transition.reverseTransition(200);
                                 } else {
                                     listView.expandGroupWithAnimation(position);
+                                    transition.startTransition(200);
                                 }
                             }
                         });
                         break;
                 }
 
+                holder.ruleNum = (TextView) convertView.findViewById(R.id.textRuleNum);
                 holder.title = (TextView) convertView.findViewById(R.id.textTitle);
                 convertView.setTag(holder);
             } else {
                 holder = (GroupHolder) convertView.getTag();
             }
+            holder.ruleNum.setText(item.ruleId.substring(0, item.ruleId.length() - 1));
             holder.title.setText(item.title);
 
             return convertView;

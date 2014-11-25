@@ -28,6 +28,7 @@ public class RuleListActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
+
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         RuleListFragment list = new RuleListFragment();
         Bundle args = new Bundle();

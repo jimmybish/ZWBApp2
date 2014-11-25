@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="colorPrimary" type="color">#FF33B5E5</item>
+    <!-- Primary black and white scheme -->
+    <item name="colorPrimary" type="color">#FF000000</item> <!-- 100% -->
+    <item name="colorPrimaryDark" type="color">#FF000000</item> <!-- Status bar, etc -->
+    <item name="colorDivider" type="color">#1E000000</item> <!-- 12% -->
+    <item name="colorDisabled" type="color">#42000000</item> <!-- 26% -->
+    <item name="colorSecondaryText" type="color">#8A000000</item> <!-- 54% -->
+    <item name="colorText" type="color">#DE000000</item> <!-- 87% -->
+    <item name="colorHighlight" type="color">#F44336</item>
+
+    <!-- Seoncdary palette -->
+
+
+    <item name="white" type="color">#FFFFFFFF</item>
 </resources>

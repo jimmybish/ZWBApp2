@@ -7,6 +7,7 @@ package com.jamesbishop.zwbapp2;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
@@ -116,6 +117,8 @@ public class AnimatedExpandableListView extends ExpandableListView {
         super(context, attrs, defStyle);
     }
 
+    private TransitionDrawable transition;
+
     /**
      * @see ExpandableListView#setAdapter(ExpandableListAdapter)
      */
@@ -129,7 +132,9 @@ public class AnimatedExpandableListView extends ExpandableListView {
         } else {
             throw new ClassCastException(adapter.toString() + " must implement AnimatedExpandableListAdapter");
         }
+
     }
+
 
     /**
      * Expands the given group with an animation.
@@ -160,6 +165,7 @@ public class AnimatedExpandableListView extends ExpandableListView {
 
         // Let the adapter know that we are starting the animation...
         adapter.startExpandAnimation(groupPos, 0);
+
         // Finally call expandGroup (note that expandGroup will call
         // notifyDataSetChanged so we don't need to)
         return expandGroup(groupPos);
@@ -206,6 +212,7 @@ public class AnimatedExpandableListView extends ExpandableListView {
         // Let the adapter know that we are going to start animating the
         // collapse animation.
         adapter.startCollapseAnimation(groupPos, firstChildPos);
+
 
         // Force the listview to refresh it's views
         adapter.notifyDataSetChanged();

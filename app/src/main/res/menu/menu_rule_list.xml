@@ -1,6 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.jamesbishop.zwbapp2.RuleListActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" />
+
+    <item android:id="@+id/menuCopy"
+        android:icon="@drawable/ic_menu_copy_holo_dark"
+        android:title="Copy to Clipboard"
+    />
+
 </menu>

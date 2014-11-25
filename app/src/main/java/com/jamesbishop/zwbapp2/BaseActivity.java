@@ -25,7 +25,7 @@ public class BaseActivity extends ActionBarActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
-        toolbar.setTitleTextColor(Color.WHITE);
+        // toolbar.setTitleTextColor(Color.WHITE);
 
     }
 

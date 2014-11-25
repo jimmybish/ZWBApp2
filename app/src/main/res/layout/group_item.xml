@@ -10,22 +10,30 @@
     android:paddingRight="16dp"
     >
 
+
+
+    <TextView
+        android:id="@+id/textRuleNum"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="5dp"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical|center_horizontal"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/white"
+        android:background="@drawable/circle_fade"
+        />
+
     <TextView
         android:id="@+id/textTitle"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_weight="1"
-        />
-
-    <ImageView
-        android:id="@+id/dropdown"
-        android:layout_width="60dip"
-        android:layout_height="50dip"
-        android:layout_gravity="bottom"
-        android:background="@drawable/dropdown_button"
-        android:elevation="2dp"
+        android:paddingLeft="16dp"
+        android:textColor="@color/colorText"
         />
 
 </LinearLayout>
