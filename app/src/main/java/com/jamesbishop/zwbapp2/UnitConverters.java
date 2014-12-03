@@ -7,7 +7,7 @@ import android.util.DisplayMetrics;
 /**
  * Created by bishopj on 25/11/2014.
  */
-public class converters {
+public class UnitConverters {
 
     public static float convertDpToPixel(float dp, Context context){
         Resources resources = context.getResources();

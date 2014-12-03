@@ -6,6 +6,7 @@ package com.jamesbishop.zwbapp2.getdata;
 public class RuleArray {
     public String ruleId;
     public String ruleContent;
+    public String ruleText;
 
     public String getRuleContent() {
         return ruleContent;
@@ -22,4 +23,9 @@ public class RuleArray {
     public void setRuleId(String ruleId) {
         this.ruleId = ruleId;
     }
+
+    public String getRuleText() { return ruleText; }
+
+    public void setRuleText(String ruleText) { this.ruleText = ruleText; }
+
 }

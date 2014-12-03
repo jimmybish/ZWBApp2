@@ -72,7 +72,7 @@ public class RuleListFragment extends Fragment {
                 Object[] tags = new Object[3];
                 tags[0] = view.getRootView().getContext();
                 tags[1] = position;
-                tags[2] = mRulesAdapter.rules.get(position).getRuleContent();
+                tags[2] = mRulesAdapter.rules.get(position).getRuleText();
                 mode.setTag(tags);
 
                 return false;
@@ -95,6 +95,7 @@ public class RuleListFragment extends Fragment {
                 RuleArray rule = new RuleArray();
                 rule.setRuleId(c.getString(0));
                 rule.setRuleContent(c.getString(1));
+                rule.setRuleText(c.getString(2));
                 mRules.add(rule);
             }
         } catch (SQLException e) {

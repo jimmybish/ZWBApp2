@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.jamesbishop.zwbapp2.RuleMenuActivity;
+
 import java.sql.SQLException;
 
 /**
@@ -23,24 +25,38 @@ public class RulesDBAdapter {
     private static final int DATABASE_VERSION = 1;
 
     // TODO: Change the below to accommodate different rulesets (date picker in settings)
-    private static final String RULES_TABLE = "rules";
-    private static final String MENU_TABLE = "m_" + RULES_TABLE;
+    private static final String KEY_RULESET = RuleMenuActivity.currentRuleset;
+    public static String RULES_TABLE = "rules_" + KEY_RULESET;
+    // This String will be set from preferences and remain static so other classes can use it.
+
+    private static final String MENU_TABLE = "menu_" + KEY_RULESET;
+    private static final String NOTES_TABLE = "notes_" + KEY_RULESET;
 
     // Columns in the rules table
     private static final String KEY_RULE_ID = "rule_id";
     private static final String KEY_RULE_CONTENT = "content";
+    private static final String KEY_RULE_BOOKMARK = "bookmark";
+    private static final String KEY_RULE_TEXT = "text"; // Pure text, no HTML. Good for sharing.
 
     // Columns in the menu table
-    // KEY_RULE_ID is the same value. No point doubling up, but this comment is a reminder it exists
+    // KEY_RULE_ID
     private static final String KEY_RULE_TITLE = "rule_title";
     private static final String KEY_MENU_INDEX = "level";
+
+    // Columns in the Notes table
+    // KEY_RULE_ID
+    private static final String KEY_NOTE_CONTENT = "note";
+    private static final String KEY_RULESET_COLUMN = "ruleset";
+
 
     // Full queries to create the 2 required tables in the DB
     private static final String RULESTABLE_CREATE =
             "create table if not exists "
             + RULES_TABLE + " (_id integer primary key autoincrement, "
             + KEY_RULE_ID + " text, "
-            + KEY_RULE_CONTENT + " text);";
+            + KEY_RULE_CONTENT + " text, "
+            + KEY_RULE_BOOKMARK + " integer, "
+            + KEY_RULE_TEXT + " text);";
 
     private static final String MENUTABLE_CREATE =
             "create table if not exists "
@@ -49,8 +65,20 @@ public class RulesDBAdapter {
             + KEY_RULE_ID + " text, "
             + KEY_RULE_TITLE + " text);";
 
-    private final Context mCtx;
+    /*
+    The Notes table will support multiple rulesets. The set will be stored
+    in the column KEY_RULE_SET, which will match the table name of the appropriate ruleset.
+    Then there will be options to view notes by rule, all notes for just the active ruleset, or all notes for all rulesets.
+     */
+    private static final String NOTESTABLE_CREATE =
+            "create table if not exists "
+            + NOTES_TABLE + " (_id integer primary key autoincrement, "
+            + KEY_RULE_ID + " text, "
+            + KEY_NOTE_CONTENT + " text, "
+            + KEY_RULESET_COLUMN + " text);";
 
+
+    private final Context mCtx;
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -65,6 +93,9 @@ public class RulesDBAdapter {
 
             Log.w(TAG, MENUTABLE_CREATE);
             db.execSQL(MENUTABLE_CREATE);
+
+            Log.w(TAG, NOTESTABLE_CREATE);
+            db.execSQL(NOTESTABLE_CREATE);
         }
 
         @Override
@@ -102,11 +133,11 @@ public class RulesDBAdapter {
     }
 
     // Insert a rule into the DB
-    public long insertRule(String rule_id, String content) {
+    public long insertRule(String rule_id, String content, String text) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_RULE_ID, rule_id + ".");
         initialValues.put(KEY_RULE_CONTENT, content);
-
+        initialValues.put(KEY_RULE_TEXT, text);
         return mDB.insert(RULES_TABLE, null, initialValues);
     }
 
@@ -135,7 +166,7 @@ public class RulesDBAdapter {
 
         // EXAMPLE for section 2: Select content from 20140301 where rule_id like '2.%' order by '_id';
         String args = KEY_RULE_ID + " like '" + section + "%';";
-        String[] column = {KEY_RULE_ID, KEY_RULE_CONTENT};
+        String[] column = {KEY_RULE_ID, KEY_RULE_CONTENT, KEY_RULE_TEXT};
         Cursor mCursor = mDB.query(true, RULES_TABLE, column, args, null, null, null, "_id", null);
         return mCursor;
     }

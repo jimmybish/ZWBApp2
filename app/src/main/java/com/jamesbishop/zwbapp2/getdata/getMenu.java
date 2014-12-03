@@ -19,7 +19,7 @@ import static com.jamesbishop.zwbapp2.RuleMenuActivity.setRefreshActionButtonSta
  */
 public class getMenu extends AsyncTask<String, Void, String> {
 
-    private interfaces.getMenuListener mListener;
+    private Interfaces.getMenuListener mListener;
     private final Context mCtx;
     private static final String TAG = "getMenu";
 

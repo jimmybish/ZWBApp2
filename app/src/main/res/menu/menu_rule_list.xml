@@ -6,5 +6,9 @@
         android:icon="@drawable/ic_menu_copy_holo_dark"
         android:title="Copy to Clipboard"
     />
+    <item android:id="@+id/menuShare"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Share"
+        />
 
 </menu>

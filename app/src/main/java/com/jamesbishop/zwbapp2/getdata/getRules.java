@@ -18,7 +18,7 @@ import static com.jamesbishop.zwbapp2.RuleMenuActivity.setRefreshActionButtonSta
  */
 public class getRules extends AsyncTask<String, Void, String> {
 
-    private interfaces.getRulesListener mListener;
+    private Interfaces.getRulesListener mListener;
     private final Context mCtx;
     private static final String TAG = "getRules";
     private String ruleId;
@@ -27,7 +27,7 @@ public class getRules extends AsyncTask<String, Void, String> {
         this.mCtx = context;
     }
 
-    public void setListener(interfaces.getRulesListener listener) {
+    public void setListener(Interfaces.getRulesListener listener) {
         mListener = listener;
     }
 
@@ -73,6 +73,7 @@ public class getRules extends AsyncTask<String, Void, String> {
                     }
 
                     String ruleContent = rule.html();
+                    String ruleText = rule.text();
 
                     // Make headings bold.
                     // TODO: work out why rule.wrap("<strong></strong> doesn't work
@@ -86,7 +87,7 @@ public class getRules extends AsyncTask<String, Void, String> {
                     if (split[0].length() > 0 && Character.isDigit(split[0].charAt(0)))
                         ruleId = split[0];
 
-                    db.insertRule(ruleId, ruleContent);
+                    db.insertRule(ruleId, ruleContent, ruleText);
 
                 }
                 db.close();

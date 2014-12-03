@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,18 +14,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
+import com.jamesbishop.zwbapp2.getdata.Interfaces;
 import com.jamesbishop.zwbapp2.getdata.RulesDBAdapter;
 import com.jamesbishop.zwbapp2.getdata.getMenu;
 import com.jamesbishop.zwbapp2.getdata.getRules;
-import com.jamesbishop.zwbapp2.getdata.interfaces;
+
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 
 /**
  * Created by bishopj on 28/08/2014.
@@ -39,7 +39,7 @@ import java.util.List;
 
 
 
-public class RuleMenuFragment extends Fragment implements interfaces.getMenuListener, interfaces.getRulesListener {
+public class RuleMenuFragment extends Fragment implements Interfaces.getMenuListener, Interfaces.getRulesListener {
 
     private AnimatedExpandableListView listView;
     public RulesMenuAdapter adapter;
@@ -47,6 +47,8 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     private List<GroupItem> items = null;
     Button emptyButton;
     onMenuSelectedListener mListener;
+
+    private static String currentRuleset = RuleMenuActivity.currentRuleset;
 
 
     private static final String TAG = "RuleMenuFragment";
@@ -100,8 +102,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         listView = (AnimatedExpandableListView) v.findViewById(R.id.expanderList);
         listView.setEmptyView(emptyButton);
 
-        // Set the indicator and position it to the right
-        // listView.setGroupIndicator(null);
+        listView.setGroupIndicator(null);
 
         listView.setDividerHeight(0);
         listView.setAdapter(adapter);
@@ -135,6 +136,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
         });
 
         // Once the listview is created, move the indicator to the right....
+
         listView.post(new Runnable() {
             @Override
             public void run() {
@@ -143,18 +145,27 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
                 convert from pixels to DP so we can do the appropriate calculations, then convert back to pixels,
                 THEN from float to int values, because heaven forbid Google has 2 related classes that understand
                 the same objects, all so it matches Google's own Material Design guidelines that don't match the
-                default setup provided by the API. I... errr... Ugh! */
-                float width = converters.convertPixelsToDp(listView.getWidth(), getActivity());
+                default setup provided by the API. I... errr... Ugh!
+                AND EVEN THEN... It doesn't set the indicator right when it gathers rules for the first time. Gotta
+                quit the app and re-open it, first... Grrr...*/
+                // TODO: Figure out a better way move the indicator to the right, first time, every time.
+
+                /*
+
+                You know what? Forget it. It's crap... Commented out, for now.
+
+                float width = convertPixelsToDp(listView.getWidth(), getActivity());
                 float myLeft =  width - 40;
                 float myRight = width - 16;
-                int myLeftpx = (int) converters.convertDpToPixel(myLeft, getActivity());
-                int myRightpx = (int) converters.convertDpToPixel(myRight, getActivity());
+                int myLeftpx = (int) convertDpToPixel(myLeft, getActivity());
+                int myRightpx = (int) convertDpToPixel(myRight, getActivity());
 
                 if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
                     listView.setIndicatorBounds(myLeftpx, myRightpx);
                 } else {
                     listView.setIndicatorBoundsRelative(myLeftpx, myRightpx);
                 }
+                */
             }
         });
         return v;
@@ -167,13 +178,13 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
     private void downloadMenu() {
         getMenu getmenu = new getMenu(getActivity());
         getmenu.setListener(this);
-        getmenu.execute("http://www.wftda.com/rules/all/20140301");
+        getmenu.execute("http://www.wftda.com/rules/all/" + currentRuleset + "/");
     }
 
     private void downloadRules() {
         getRules getrules = new getRules(getActivity());
         getrules.setListener(this);
-        getrules.execute("http://www.wftda.com/rules/all/20140301/");
+        getrules.execute("http://www.wftda.com/rules/all/" + currentRuleset + "/");
     }
 
 
@@ -440,7 +451,7 @@ public class RuleMenuFragment extends Fragment implements interfaces.getMenuList
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.menu_rule_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
         final MenuItem refreshItem = menu.findItem(R.id.menuRefresh);
         refreshItem.setVisible(true);

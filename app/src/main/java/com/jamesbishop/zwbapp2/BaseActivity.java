@@ -8,12 +8,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.jamesbishop.zwbapp2.common.AutoUpdateApk;
+
 public class BaseActivity extends ActionBarActivity {
 
     public static Toolbar toolbar;
     public static Menu optionsMenu;
     public static boolean menuRefreshing;
     public static boolean rulesRefreshing;
+
+
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -25,17 +29,10 @@ public class BaseActivity extends ActionBarActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
-        // toolbar.setTitleTextColor(Color.WHITE);
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        optionsMenu = menu;
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
+
 
 
     /*
